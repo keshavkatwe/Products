@@ -1,0 +1,27 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context=".HomeActivity">
+
+    <include
+        android:id="@+id/app_bar"
+        layout="@layout/app_toolbar" />
+
+    <android.support.design.widget.CoordinatorLayout
+        android:layout_below="@+id/app_bar"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/fab"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end|bottom"
+            android:src="@drawable/ic_plus_white_24dp"
+            app:borderWidth="0dp"
+            android:layout_margin="@dimen/margin_fab"/>
+    </android.support.design.widget.CoordinatorLayout>
+
+</RelativeLayout>
