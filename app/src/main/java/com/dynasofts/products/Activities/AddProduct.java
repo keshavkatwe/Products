@@ -1,5 +1,7 @@
 package com.dynasofts.products.Activities;
 
+import android.app.ProgressDialog;
+import android.content.Intent;
 import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -11,8 +13,23 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.android.volley.AuthFailureError;
+import com.android.volley.DefaultRetryPolicy;
+import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.dynasofts.products.Core.Config;
 import com.dynasofts.products.Core.Session;
+import com.dynasofts.products.Logging.L;
+import com.dynasofts.products.Network.VolleySingleton;
 import com.dynasofts.products.R;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class AddProduct extends AppCompatActivity implements View.OnClickListener {
 
@@ -21,6 +38,7 @@ public class AddProduct extends AppCompatActivity implements View.OnClickListene
     private Button mSave;
     private String productId, productType;
     private Session mSession;
+    private ProgressDialog mProgressDialog;
 
 
     @Override
@@ -42,6 +60,12 @@ public class AddProduct extends AppCompatActivity implements View.OnClickListene
         mSave = (Button) findViewById(R.id.save_btn);
 
         mSave.setOnClickListener(this);
+
+
+        mProgressDialog = new ProgressDialog(this);
+        mProgressDialog.setTitle("Saving");
+        mProgressDialog.setMessage("Please wait...");
+        mProgressDialog.setCancelable(false);
     }
 
     @Override
@@ -83,10 +107,60 @@ public class AddProduct extends AppCompatActivity implements View.OnClickListene
 
         if (isValidated) {
 
+            mProgressDialog.show();
+
+            JSONObject mJsonObject = new JSONObject();
+            try {
+                mJsonObject.put("userid", mSession.getUserId());
+                mJsonObject.put("productid", productId);
+                mJsonObject.put("producttype", productType);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
 
 
 
+            String url = Config.URL + "products.php?type=add";
 
+            JsonObjectRequest jsObjRequest = new JsonObjectRequest
+                    (Request.Method.POST, url, mJsonObject, new Response.Listener<JSONObject>() {
+
+                        @Override
+                        public void onResponse(JSONObject response) {
+                            mProgressDialog.dismiss();
+
+                            try {
+                                if (response.getBoolean("success"))
+                                {
+                                    finish();
+                                }
+                                L.m(response.toString());
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+
+                        }
+                    }, new Response.ErrorListener() {
+
+                        @Override
+                        public void onErrorResponse(VolleyError error) {
+                            L.m(error.toString());
+                        }
+                    }) {
+                @Override
+                protected Map<String, String> getParams() throws AuthFailureError {
+                    Map<String, String> params = new HashMap<>();
+                    params.put("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
+                    return params;
+                }
+            };
+
+
+            jsObjRequest.setRetryPolicy(new DefaultRetryPolicy(5000,
+                    DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+                    DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+
+            VolleySingleton.getInstance().addToRequestQueue(jsObjRequest);
         }
     }
 }

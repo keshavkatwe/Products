@@ -14,6 +14,7 @@ import com.dynasofts.products.R;
 
 public class HomeActivity extends AppCompatActivity {
 
+    private static final int REQUEST_CODE = 1;
     private Session mSession;
     private FloatingActionButton mFab;
 
@@ -37,9 +38,20 @@ public class HomeActivity extends AppCompatActivity {
         mFab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                startActivity(new Intent(getApplicationContext(),AddProduct.class));
+                startActivityForResult(new Intent(getApplicationContext(), AddProduct.class), REQUEST_CODE);
             }
         });
+    }
+
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+
+
+
+
     }
 
     @Override
