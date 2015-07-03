@@ -94,16 +94,13 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
 
         return super.onOptionsItemSelected(item);
     }
 
     @Override
-    public void onClick(View view) {
+    public void onClick(final View view) {
+
 
         Boolean is_validated = true;
 
@@ -131,63 +128,66 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
         if (is_validated == true) {
 
+            if (!mSession.isNetworkAvailable()) {
+                Snackbar.make(view, "No internet available", Snackbar.LENGTH_LONG).show();
+            } else {
+                mProgressDialog.show();
 
-            mProgressDialog.show();
-
-            JSONObject mJsonObject = new JSONObject();
-            try {
-                mJsonObject.put("email", email);
-                mJsonObject.put("password", password);
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
+                JSONObject mJsonObject = new JSONObject();
+                try {
+                    mJsonObject.put("email", email);
+                    mJsonObject.put("password", password);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
 
 
-            String url = Config.URL + "login.php";
+                String url = Config.URL + "login.php";
 
-            JsonObjectRequest jsObjRequest = new JsonObjectRequest
-                    (Request.Method.POST, url, mJsonObject, new Response.Listener<JSONObject>() {
+                JsonObjectRequest jsObjRequest = new JsonObjectRequest
+                        (Request.Method.POST, url, mJsonObject, new Response.Listener<JSONObject>() {
 
-                        @Override
-                        public void onResponse(JSONObject response) {
-                            mProgressDialog.dismiss();
+                            @Override
+                            public void onResponse(JSONObject response) {
+                                mProgressDialog.dismiss();
 //                        L.m(response.toString());
-                            try {
-                                Boolean user_exist = response.getBoolean("user_exist");
-                                if (user_exist == true) {
-                                    mSession.setSession(response.getString("id"), response.getString("name"), email);
-                                    finish();
-                                    startActivity(new Intent(getApplicationContext(), HomeActivity.class));
-                                } else {
-                                    mAlertDialog.show();
+                                try {
+                                    Boolean user_exist = response.getBoolean("user_exist");
+                                    if (user_exist == true) {
+                                        mSession.setSession(response.getString("id"), response.getString("name"), email);
+                                        finish();
+                                        startActivity(new Intent(getApplicationContext(), HomeActivity.class));
+                                    } else {
+                                        mAlertDialog.show();
+                                    }
+
+                                } catch (JSONException e) {
+                                    e.printStackTrace();
                                 }
 
-                            } catch (JSONException e) {
-                                e.printStackTrace();
                             }
+                        }, new Response.ErrorListener() {
 
-                        }
-                    }, new Response.ErrorListener() {
-
-                        @Override
-                        public void onErrorResponse(VolleyError error) {
-                            L.m(error.toString());
-                        }
-                    }) {
-                @Override
-                protected Map<String, String> getParams() throws AuthFailureError {
-                    Map<String, String> params = new HashMap<>();
-                    params.put("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
-                    return params;
-                }
-            };
+                            @Override
+                            public void onErrorResponse(VolleyError error) {
+                                L.m(error.toString());
+                            }
+                        }) {
+                    @Override
+                    protected Map<String, String> getParams() throws AuthFailureError {
+                        Map<String, String> params = new HashMap<>();
+                        params.put("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
+                        return params;
+                    }
+                };
 
 
-            jsObjRequest.setRetryPolicy(new DefaultRetryPolicy(5000,
-                    DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
-                    DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+                jsObjRequest.setRetryPolicy(new DefaultRetryPolicy(5000,
+                        DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+                        DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
 
-            VolleySingleton.getInstance().addToRequestQueue(jsObjRequest);
+                VolleySingleton.getInstance().addToRequestQueue(jsObjRequest);
+            }
         }
     }
 

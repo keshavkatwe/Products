@@ -1,6 +1,7 @@
 package com.dynasofts.products.Core;
 
 import android.content.Context;
+import android.net.ConnectivityManager;
 
 import com.dynasofts.products.Util.Preferences;
 
@@ -28,8 +29,7 @@ public class Session {
         }
     }
 
-    public String getUserId()
-    {
+    public String getUserId() {
         String id = Preferences.readFromPreferences(mContext, SESSION_FILE, ID, "");
         return id;
     }
@@ -38,5 +38,14 @@ public class Session {
         Preferences.saveToPreferences(mContext, SESSION_FILE, ID, id);
         Preferences.saveToPreferences(mContext, SESSION_FILE, NAME, name);
         Preferences.saveToPreferences(mContext, SESSION_FILE, EMAIL, email);
+    }
+
+    public boolean isNetworkAvailable() {
+        return ((ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE)).getActiveNetworkInfo() != null;
+    }
+
+    public boolean logout() {
+        Preferences.deletePreferences(mContext, SESSION_FILE);
+        return true;
     }
 }

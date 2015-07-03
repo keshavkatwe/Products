@@ -18,4 +18,11 @@ public class Preferences {
         SharedPreferences sharedPreferences = context.getSharedPreferences(prefFileName, Context.MODE_PRIVATE);
         return sharedPreferences.getString(preferenceName, defaultValue);
     }
+
+    public static void deletePreferences(Context context, String prefFileName)
+    {
+        SharedPreferences.Editor editor = context.getSharedPreferences(prefFileName, Context.MODE_PRIVATE).edit();
+        editor.clear();
+        editor.commit();
+    }
 }
